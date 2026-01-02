@@ -1,0 +1,61 @@
+name: Microase CI Pipeline
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  ci-pipeline:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Newman
+        run: npm install -g newman
+
+      # Unit Test: Calc
+      - name: Unit Test - Calc Service
+        run: |
+          docker build -t calc-test -f microase/src/calc/Dockerfile_test microase/src/calc
+          docker run -d --name calc-container -p 5000:5000 calc-test
+          sleep 5
+          newman run microase/tests/calc_ut.postman_collection.json
+
+      - name: Stop Calc Container
+        if: always()
+        run: docker stop calc-container || true && docker rm calc-container || true
+
+      # Unit Test: String
+      - name: Unit Test - String Service
+        run: |
+          docker build -t string-test -f microase/src/string/Dockerfile_test microase/src/string
+          docker run -d --name string-container -p 5000:5000 string-test
+          sleep 5
+          newman run microase/tests/string_ut.postman_collection.json
+
+      - name: Stop String Container
+        if: always()
+        run: docker stop string-container || true && docker rm string-container || true
+
+      # Integración Total
+      - name: Build and Run Architecture
+        run: |
+          cd microase/src
+          docker-compose up -d
+          sleep 10
+
+      - name: Integration Tests
+        run: |
+          newman run microase/tests/integration.postman_collection.json
+
+      - name: Cleanup
+        if: always()
+        run: |
+          cd microase/src
+          docker-compose down
