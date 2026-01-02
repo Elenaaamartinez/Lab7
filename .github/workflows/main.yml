@@ -47,7 +47,7 @@ jobs:
       - name: Build and Run Architecture
         run: |
           cd microase/src
-          docker-compose up -d
+          docker compose up -d
           sleep 10
 
       - name: Integration Tests
@@ -58,4 +58,4 @@ jobs:
         if: always()
         run: |
           cd microase/src
-          docker-compose down
+          docker compose down
