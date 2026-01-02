@@ -1,4 +1,5 @@
 name: Microase CI Pipeline
+
 on:
   push:
     branches: [ main ]
@@ -8,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        [cite_start]uses: actions/checkout@v4 # Clona el repositorio en el runner [cite: 241]
+        [cite_start]uses: actions/checkout@v4 [cite: 241]
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -16,18 +17,18 @@ jobs:
           node-version: '20'
 
       - name: Install Newman
-        [cite_start]run: npm install -g newman # Necesario para correr colecciones de Postman [cite: 559, 568]
+        [cite_start]run: npm install -g newman [cite: 559, 568]
 
       # Unit Test: Calc
       - name: Unit Test - Calc Service
         run: |
-          docker build -t calc-test -f microase/src/calc/Dockerfile_test microase/src/calc [cite: 572]
-          docker run -d --name calc-container -p 5000:5000 calc-test [cite: 574]
+          [cite_start]docker build -t calc-test -f microase/src/calc/Dockerfile_test microase/src/calc [cite: 572]
+          [cite_start]docker run -d --name calc-container -p 5000:5000 calc-test [cite: 574]
           sleep 5
-          newman run microase/tests/calc_ut.postman_collection.json [cite: 577]
+          [cite_start]newman run microase/tests/calc_ut.postman_collection.json [cite: 577]
 
       - name: Stop Calc Container
-        [cite_start]if: always() # Se ejecuta aunque fallen los tests [cite: 578]
+        [cite_start]if: always() [cite: 578]
         run: docker stop calc-container || true && docker rm calc-container || true
 
       # Unit Test: String
@@ -46,12 +47,12 @@ jobs:
       - name: Build and Run Architecture
         run: |
           cd microase/src
-          docker-compose up -d [cite: 580]
+          [cite_start]docker-compose up -d [cite: 580]
           sleep 10
 
       - name: Integration Tests
         run: |
-          newman run microase/tests/integration.postman_collection.json [cite: 581]
+          [cite_start]newman run microase/tests/integration.postman_collection.json [cite: 581]
 
       - name: Cleanup
         if: always()
